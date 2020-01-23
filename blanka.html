@@ -2,8 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Index</title>
-        <link rel="stylesheet" href="style.css">
+        <title></title>
         <style type="text/css">
             body {
                 background-color: white;
@@ -32,7 +31,7 @@
     </body>
     <script type="text/javascript">
         let hash = (window.location.hash || '#').slice(1);
-        document.getElementById('q').value = hash;
+        document.getElementById('q').value = decodeURI(hash);
         function update() {
             let input = document.getElementById('q').value;
             document.title = input;
