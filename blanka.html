@@ -36,7 +36,7 @@
         function update() {
             let input = document.getElementById('q').value;
             document.title = input;
-            window.location.hash = input;
+            history.pushState(null, null, '#' + input);
         }
         update();
     </script>
