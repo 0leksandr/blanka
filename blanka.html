@@ -9,34 +9,61 @@
                 height: 100vh;
                 margin: 0;
             }
-            #q {
+            #c * {
                 width: 1000px;
                 height: 150px;
+            }
+            #c * {
                 font-size: 96px;
             }
 
             body {
                 position: relative;
             }
-            #q {
+            #c {
                 position: absolute;
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
             }
+
+            #span {
+                visibility: hidden;
+                white-space: pre;
+            }
         </style>
     </head>
     <body>
-        <input type="text" id="q" name="q" oninput="update()" aria-label="">
+        <div id="c">
+            <input type="text" id="q" class="q" name="q" oninput="update()" aria-label="">
+            <br>
+            <span id="span"></span>
+        </div>
     </body>
     <script type="text/javascript">
-        let hash = (window.location.hash || '#').slice(1);
-        document.getElementById('q').value = decodeURI(hash);
+        const hash = (window.location.hash || '#').slice(1);
+        const q    = document.getElementById('q');
+        q.value    = decodeURI(hash);
         function update() {
-            let input = document.getElementById('q').value;
-            document.title = input;
-            history.replaceState(null, null, '#' + input);
+            const inputVal = q.value;
+            document.title = inputVal;
+            history.replaceState(null, null, '#' + inputVal);
+            adjustWidth();
         }
+
+        const span = document.getElementById('span');
+        (() => {
+            function css(element, property) {
+                return window.getComputedStyle(element, null).getPropertyValue(property);
+            }
+            span.style.fontFamily = css(q, 'font-family');
+            span.style.fontSize   = css(q, 'font-size');
+        })();
+        function adjustWidth() {
+            span.innerHTML = q.value;
+            q.style.width  = span.getBoundingClientRect().width + "px";
+        }
+
         update();
     </script>
 </html>
