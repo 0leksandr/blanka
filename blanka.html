@@ -41,9 +41,9 @@
         </div>
     </body>
     <script type="text/javascript">
-        const hash = (window.location.hash || '#').slice(1);
-        const q    = document.getElementById('q');
-        q.value    = decodeURI(hash);
+        const hash  = (window.location.hash || '#').slice(1);
+        const input = document.getElementById('q');
+        input.value = decodeURI(hash);
 
         let running = false;
         async function update() {
@@ -51,7 +51,7 @@
             running = true;
             await new Promise(resolve => setTimeout(resolve, 500));
 
-            const inputVal = q.value;
+            const inputVal = input.value;
             document.title = inputVal;
             history.replaceState(null, null, '#' + inputVal);
             adjustWidth();
@@ -64,16 +64,16 @@
             function css(element, property) {
                 return window.getComputedStyle(element, null).getPropertyValue(property);
             }
-            span.style.fontFamily = css(q, 'font-family');
-            span.style.fontSize   = css(q, 'font-size');
+            span.style.fontFamily = css(input, 'font-family');
+            span.style.fontSize   = css(input, 'font-size');
         })();
         function adjustWidth() {
-            span.innerHTML = q.value;
-            q.style.width  = span.getBoundingClientRect().width + "px";
+            span.innerHTML    = input.value;
+            input.style.width = span.getBoundingClientRect().width + "px";
         }
 
         update();
-        q.focus();
+        if (input.value === '') input.focus();
     </script>
     <script type="text/javascript">
         function setFavicon(href) {
