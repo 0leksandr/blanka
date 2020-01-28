@@ -75,4 +75,17 @@
         update();
         q.focus();
     </script>
+    <script type="text/javascript">
+        function setFavicon(href) {
+            const fi = document.createElement('link');
+            fi.setAttribute('rel', 'shortcut icon');
+            fi.setAttribute('href', href);
+            document.querySelector('head').appendChild(fi);
+        }
+        const icons = ['red', 'orange', 'yellow', 'lightgreen', 'green', 'lightblue', 'blue'];
+        let icon = icons[Math.floor(Math.random() * icons.length)];
+        let hrefParts = window.location.href.split('/');
+        icon = hrefParts.slice(0, hrefParts.length - 1).join('/') + '/favicons/' + icon + '.ico';
+        setFavicon(icon);
+    </script>
 </html>
