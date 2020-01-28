@@ -44,11 +44,19 @@
         const hash = (window.location.hash || '#').slice(1);
         const q    = document.getElementById('q');
         q.value    = decodeURI(hash);
-        function update() {
+
+        let running = false;
+        async function update() {
+            if (running) return;
+            running = true;
+            await new Promise(resolve => setTimeout(resolve, 500));
+
             const inputVal = q.value;
             document.title = inputVal;
             history.replaceState(null, null, '#' + inputVal);
             adjustWidth();
+
+            running = false;
         }
 
         const span = document.getElementById('span');
@@ -65,5 +73,6 @@
         }
 
         update();
+        q.focus();
     </script>
 </html>
