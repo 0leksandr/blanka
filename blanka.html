@@ -47,6 +47,8 @@
 
         let running = false;
         async function update() {
+            adjustWidth();
+
             if (running) return;
             running = true;
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -54,7 +56,6 @@
             const inputVal = input.value;
             document.title = inputVal;
             history.replaceState(null, null, '#' + inputVal);
-            adjustWidth();
 
             running = false;
         }
@@ -69,7 +70,7 @@
         })();
         function adjustWidth() {
             span.innerHTML    = input.value;
-            input.style.width = span.getBoundingClientRect().width + "px";
+            input.style.width = span.getBoundingClientRect().width + 3 + "px";
         }
 
         update();
