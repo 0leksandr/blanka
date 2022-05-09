@@ -84,7 +84,7 @@
         }
         const icons = ['red', 'orange', 'yellow', 'lightgreen', 'green', 'lightblue', 'blue'];
         const icon = icons[Math.floor(Math.random() * icons.length)];
-        const iconHref = `${window.location.href}favicons/${icon}.ico`;
+        const iconHref = `${window.location.origin}${window.location.pathname}favicons/${icon}.ico`;
 console.log({iconHref});
         setFavicon(iconHref);
     </script>
