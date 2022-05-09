@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" manifest="/offline.manifest">
+<html lang="en">
     <head>
         <meta charset="UTF-8">
         <title></title>
-        <style type="text/css">
+        <link id="favicon" rel="icon">
+        <style>
             body {
                 background-color: white;
                 height: 100vh;
@@ -79,15 +80,19 @@
     </script>
     <script type="text/javascript">
         function setFavicon(href) {
-            const fi = document.createElement('link');
-            fi.setAttribute('rel', 'shortcut icon');
-            fi.setAttribute('href', href);
-            document.querySelector('head').appendChild(fi);
+            document.getElementById("favicon").setAttribute('href', href);
         }
         const icons = ['red', 'orange', 'yellow', 'lightgreen', 'green', 'lightblue', 'blue'];
-        let icon = icons[Math.floor(Math.random() * icons.length)];
-        let hrefParts = window.location.href.split('/');
-        icon = hrefParts.slice(0, hrefParts.length - 1).join('/') + '/favicons/' + icon + '.ico';
-        setFavicon(icon);
+        const icon = icons[Math.floor(Math.random() * icons.length)];
+        const iconHref = `${window.location.href}favicons/${icon}.ico`;
+console.log({iconHref});
+        setFavicon(iconHref);
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker
+                .register('/service-worker.js')
+                .catch(console.error);
+        }
     </script>
 </html>
