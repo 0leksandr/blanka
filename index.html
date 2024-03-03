@@ -94,7 +94,7 @@
     <script type="text/javascript">
         const version_key = "version";
         const getVersion = () => window.localStorage.getItem(version_key);
-        const updateVersion = () => { window.localStorage.setItem(version_key, (new Date()).toISOString()) };
+        const updateVersion = () => { window.localStorage.setItem(version_key, (new Date()).toISOString().replace("T", " ").slice(0, 19)) };
 
         const getSet = (key, value) => {
             const stored = window.sessionStorage.getItem(key);
