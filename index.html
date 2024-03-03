@@ -76,7 +76,11 @@
         }
 
         update();
-        if (input.value === '') input.focus();
+        if (input.value === '') {
+            input.focus();
+        } else {
+            window.setTimeout(update, 1000); // fix for glitch with not always correctly initializing on browser startup
+        }
     </script>
     <script type="text/javascript">
         function setFavicon(href) {
@@ -85,6 +89,30 @@
         const icons = ['red', 'orange', 'yellow', 'lightgreen', 'green', 'lightblue', 'blue'];
         const icon = icons[Math.floor(Math.random() * icons.length)];
         setFavicon(`${window.location.origin}${window.location.pathname}favicons/${icon}.ico`);
+    </script>
+    <script type="text/javascript">
+        const version_key = "version";
+        const getVersion = () => window.localStorage.getItem(version_key);
+        const updateVersion = () => { window.localStorage.setItem(version_key, Date.now()) };
+
+        const getSet = (key, value) => {
+            const stored = window.sessionStorage.getItem(key);
+            window.sessionStorage.setItem(key, value ? "1" : "0");
+            return stored === "1";
+        };
+        const getSetAutoReloaded = value => getSet("auto-reloaded", value);
+        if (!!getSet("reloaded", true) && !getSetAutoReloaded(false)) updateVersion();
+        const currentVersion = getVersion();
+
+        window.setInterval(
+            () => {
+                if (getVersion() !== currentVersion) {
+                    getSetAutoReloaded(true);
+                    window.location.reload();
+                }
+            },
+            1000,
+        );
     </script>
     <script>
         if ('serviceWorker' in navigator) {
