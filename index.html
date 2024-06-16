@@ -38,8 +38,8 @@
     </head>
     <body>
         <div id="container">
-            <input type="text" id="text" oninput="update()" aria-label="">
-            <br>
+            <input type="text" id="text" oninput="update()" aria-label=""/>
+            <br/>
             <span id="span"></span>
         </div>
     </body>
@@ -65,9 +65,7 @@
 
         const span = document.getElementById('span');
         (() => {
-            function css(element, property) {
-                return window.getComputedStyle(element, null).getPropertyValue(property);
-            }
+            const css = (element, property) => window.getComputedStyle(element, null).getPropertyValue(property);
             span.style.fontFamily = css(input, 'font-family');
             span.style.fontSize   = css(input, 'font-size');
         })();
