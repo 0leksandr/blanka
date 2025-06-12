@@ -10,14 +10,12 @@
                 height: 100vh;
                 margin: 0;
             }
-            #container * {
-                width: 1000px;
-                height: 150px;
-            }
             #text {
                 font-size: 96px;
+                font-family: Arial,serif;
                 border: 1px solid lightgrey;
                 border-radius: 5px;
+                overflow: hidden;
             }
 
             body {
@@ -38,7 +36,7 @@
     </head>
     <body>
         <div id="container">
-            <input type="text" id="text" oninput="update()" aria-label=""/>
+            <textarea id="text" oninput="update()" aria-label=""></textarea>
             <br/>
             <span id="span"></span>
         </div>
@@ -48,15 +46,55 @@
         const input = document.getElementById('text');
         input.value = decodeURI(hash);
 
+        const separator = " ";
+        const linesSeparator = "\n";
+        const getWidth = text => {
+            span.innerHTML = text;
+            return span.getBoundingClientRect().width;
+        }
+        const getHeight = text => {
+            span.innerHTML = text;
+            return span.getBoundingClientRect().height;
+        };
+        const text = () => input.value.replaceAll(linesSeparator, separator);
+        const range = length => Array.from({length}, (_, i) => i);
+        const indexOfMin = array => array.indexOf(Math.min(...array));
+
         let running = false;
         async function update() {
-            adjustWidth();
+            const words = text().split(separator);
+            const widths = words.map(getWidth);
+            const spaceWidth = getWidth(separator);
+            const widthsWithSpaces = widths.map(width => width + spaceWidth);
+            const widthsWithSpacesAccumulated = widthsWithSpaces
+                .reduce(
+                    (accumulated, current) => accumulated.concat([accumulated.at(-1) + current]),
+                    [0],
+                )
+                .slice(1);
+            const maxLineWidth = document.body.clientWidth * 0.9;
+            const inputWidth = getWidth(text());
+            const nrLines = Math.ceil(inputWidth / maxLineWidth);
+            const lineWidth = inputWidth / nrLines;
+            const pageBreakIndices = range(nrLines - 1).map(page => {
+                return 1 + indexOfMin(widthsWithSpacesAccumulated.map(width => {
+                    return Math.abs(width - lineWidth * (page + 1));
+                }));
+            });
+            const indicesAll = [0].concat(pageBreakIndices).concat([words.length]); // TODO: rename
+            const lines = range(nrLines).map(index => {
+                return words.slice(indicesAll[index], indicesAll[index + 1]).join(separator);
+            });
+            input.style.width = Math.max(...lines.map(getWidth)) + "px";
+            input.style.height = getHeight("a") * lines.length + "px";
+            input.value = lines.join(linesSeparator);
+
 
             if (running) return;
             running = true;
             await new Promise(resolve => setTimeout(resolve, 500));
 
-            const inputVal = input.value;
+            const inputVal = text();
             document.title = inputVal;
             history.replaceState(null, null, '#' + inputVal);
 
@@ -69,10 +107,6 @@
             span.style.fontFamily = css(input, 'font-family');
             span.style.fontSize   = css(input, 'font-size');
         })();
-        function adjustWidth() {
-            span.innerHTML    = input.value;
-            input.style.width = span.getBoundingClientRect().width + "px";
-        }
 
         update();
         if (input.value === '') {
@@ -94,7 +128,7 @@
         const getVersion = () => window.localStorage.getItem(version_key);
         const updateVersion = () => {
             const d = new Date();
-            const pad = value => ("0" + value).substr(-2);
+            const pad = value => ("0" + value).substring(-2);
             const _ = method => pad(d["get" + method]());
             window.localStorage.setItem(
                 version_key,
