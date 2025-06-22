@@ -44,6 +44,7 @@
     <script type="text/javascript">
         const hash  = (window.location.hash || '#').slice(1);
         const input = document.getElementById('text');
+        const span = document.getElementById('span');
         input.value = decodeURI(hash);
 
         const separator = " ";
@@ -85,8 +86,8 @@
             const lines = range(nrLines).map(index => {
                 return words.slice(indicesAll[index], indicesAll[index + 1]).join(separator);
             });
-            input.style.width = Math.max(...lines.map(getWidth)) + "px";
-            input.style.height = getHeight("a") * lines.length + "px";
+            input.style.width = `${lines.length > 0 ? Math.max(...lines.map(getWidth)) : 3}px`;
+            input.style.height = `${getHeight("a") * (lines.length || 1)}px`;
             input.value = lines.join(linesSeparator);
 
 
@@ -101,7 +102,6 @@
             running = false;
         }
 
-        const span = document.getElementById('span');
         (() => {
             const css = (element, property) => window.getComputedStyle(element, null).getPropertyValue(property);
             span.style.fontFamily = css(input, 'font-family');
@@ -128,7 +128,7 @@
         const getVersion = () => window.localStorage.getItem(version_key);
         const updateVersion = () => {
             const d = new Date();
-            const pad = value => ("0" + value).substring(-2);
+            const pad = value => value.toString().padStart(2, '0');
             const _ = method => pad(d["get" + method]());
             window.localStorage.setItem(
                 version_key,
