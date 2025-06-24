@@ -109,12 +109,14 @@ console.log({nrLines, inputWidth, maxLineWidth})
             span.style.fontSize   = css(input, 'font-size');
         })();
 
-        update();
-        if (input.value === '') {
-            input.focus();
-        } else {
-            window.setTimeout(update, 1000); // fix for glitch with not always correctly initializing on browser startup
-        }
+        // update();
+        // if (input.value === '') {
+        //     input.focus();
+        // } else {
+        //     window.setTimeout(update, 1000); // fix for glitch with not always correctly initializing on browser startup
+        // }
+
+        document.addEventListener("DOMContentLoaded", update);
     </script>
     <script type="text/javascript">
         function setFavicon(href) {
