@@ -60,6 +60,18 @@
         const text = () => input.value.replaceAll(linesSeparator, separator);
         const range = length => Array.from({length}, (_, i) => i);
         const indexOfMin = array => array.indexOf(Math.min(...array));
+        const asyncResult = async (fn, check, intervalMs = 100) => new Promise((resolve) => {
+            const interval = window.setInterval(
+                () => {
+                    const result = fn();
+                    if (check(result)) {
+                        window.clearInterval(interval);
+                        resolve(result);
+                    }
+                },
+                intervalMs,
+            );
+        });
 
         let running = false;
         async function update() {
@@ -73,7 +85,11 @@
                     [0],
                 )
                 .slice(1);
-            const maxLineWidth = document.body.clientWidth * 0.9;
+            const clientWidth = await asyncResult(
+                () => document.body.clientWidth,
+                clientWidth => clientWidth > 0,
+            );
+            const maxLineWidth = clientWidth * 0.9;
             const inputWidth = getWidth(text());
             const nrLines = Math.ceil(inputWidth / maxLineWidth);
             const lineWidth = inputWidth / nrLines;
