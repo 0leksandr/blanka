@@ -45,7 +45,12 @@
         const hash  = (window.location.hash || '#').slice(1);
         const input = document.getElementById('text');
         const span = document.getElementById('span');
-        input.value = decodeURI(hash);
+
+        if (hash === '') {
+            input.focus();
+        } else {
+            input.value = decodeURI(hash);
+        }
 
         const separator = " ";
         const linesSeparator = "\n";
@@ -126,12 +131,6 @@ console.log({nrLines, inputWidth, maxLineWidth})
         })();
 
         update();
-        if (input.value === '') {
-            input.focus();
-        } else {
-            window.setTimeout(update, 1000); // fix for glitch with not always correctly initializing on browser startup
-        }
-
         document.addEventListener("DOMContentLoaded", update);
     </script>
     <script type="text/javascript">
