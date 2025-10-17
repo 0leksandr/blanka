@@ -80,14 +80,14 @@
 
         let maxLineWidth;
 
-        async function init() {
-            const clientWidth = await asyncResult(
+        function init() {
+            asyncResult(
                 () => document.body.clientWidth,
                 clientWidth => clientWidth > 0,
-            );
-            maxLineWidth = clientWidth * 0.9;
-
-            await update();
+            ).
+            then(clientWidth => { maxLineWidth = clientWidth * 0.9 }).
+            then(update).
+            catch(console.error);
         }
 
         let running = false;
