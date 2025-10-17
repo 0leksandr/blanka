@@ -78,6 +78,18 @@
             );
         });
 
+        let maxLineWidth;
+
+        async function init() {
+            const clientWidth = await asyncResult(
+                () => document.body.clientWidth,
+                clientWidth => clientWidth > 0,
+            );
+            maxLineWidth = clientWidth * 0.9;
+
+            await update();
+        }
+
         let running = false;
         async function update() {
             const words = text().split(separator);
@@ -90,15 +102,10 @@
                     [0],
                 )
                 .slice(1);
-            const clientWidth = await asyncResult(
-                () => document.body.clientWidth,
-                clientWidth => clientWidth > 0,
-            );
-            const maxLineWidth = clientWidth * 0.9;
             const inputWidth = getWidth(text());
             const nrLines = Math.ceil(inputWidth / maxLineWidth);
             const lineWidth = inputWidth / nrLines;
-console.log({nrLines, inputWidth, maxLineWidth})
+console.log({nrLines, inputWidth});
             const pageBreakIndices = range(nrLines - 1).map(page => {
                 return 1 + indexOfMin(widthsWithSpacesAccumulated.map(width => {
                     return Math.abs(width - lineWidth * (page + 1));
@@ -130,8 +137,8 @@ console.log({nrLines, inputWidth, maxLineWidth})
             span.style.fontSize   = css(input, 'font-size');
         })();
 
-        update();
-        document.addEventListener("DOMContentLoaded", update);
+        init();
+        // document.addEventListener("DOMContentLoaded", init);
     </script>
     <script type="text/javascript">
         function setFavicon(href) {
