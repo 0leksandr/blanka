@@ -63,8 +63,6 @@
             return span.getBoundingClientRect().height;
         };
         const text = () => input.value.replaceAll(linesSeparator, separator);
-        const range = length => Array.from({length}, (_, i) => i);
-        const indexOfMin = array => array.indexOf(Math.min(...array));
         const asyncResult = async (fn, check, intervalMs = 100) => new Promise((resolve) => {
             const interval = window.setInterval(
                 () => {
@@ -95,27 +93,33 @@
             const words = text().split(separator);
             const widths = words.map(getWidth);
             const spaceWidth = getWidth(separator);
-            const widthsWithSpaces = widths.map(width => width + spaceWidth);
-            const widthsWithSpacesAccumulated = widthsWithSpaces
-                .reduce(
-                    (accumulated, current) => accumulated.concat([accumulated.at(-1) + current]),
-                    [0],
-                )
-                .slice(1);
-            const inputWidth = getWidth(text());
-            const nrLines = Math.ceil(inputWidth / maxLineWidth);
-            const lineWidth = inputWidth / nrLines;
-console.log({nrLines, inputWidth});
-            const pageBreakIndices = range(nrLines - 1).map(page => {
-                return 1 + indexOfMin(widthsWithSpacesAccumulated.map(width => {
-                    return Math.abs(width - lineWidth * (page + 1));
-                }));
-            });
-            const indicesAll = [0].concat(pageBreakIndices).concat([words.length]); // TODO: rename
-            const lines = range(nrLines).map(index => {
-                return words.slice(indicesAll[index], indicesAll[index + 1]).join(separator);
-            });
-            input.style.width = `${lines.length > 0 ? Math.max(...lines.map(getWidth)) : 3}px`;
+            // Greedy pack under `limit`. No line exceeds it unless a single word does.
+            const wrap = limit => {
+                const lines = [];
+                let line = [], width = 0;
+                words.forEach((word, index) => {
+                    const extra = line.length ? spaceWidth + widths[index] : widths[index];
+                    if (line.length && width + extra > limit) {
+                        lines.push(line);
+                        line = [word];
+                        width = widths[index];
+                    } else {
+                        line.push(word);
+                        width += extra;
+                    }
+                });
+                return lines.concat([line]);
+            };
+            // Fewest lines that fit, then the narrowest limit still reaching that
+            // count - which is what balances them. Binary search, to the pixel.
+            const nrLines = wrap(maxLineWidth).length;
+            let low = 0, high = Math.max(maxLineWidth, ...widths);
+            while (high - low > 1) {
+                const middle = (low + high) / 2;
+                if (wrap(middle).length <= nrLines) high = middle; else low = middle;
+            }
+            const lines = wrap(high).map(line => line.join(separator));
+            input.style.width = `${Math.max(...lines.map(getWidth)) || 3}px`;
             input.style.height = `${getHeight("a") * (lines.length || 1)}px`;
             input.value = lines.join(linesSeparator);
 
