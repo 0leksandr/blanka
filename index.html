@@ -63,33 +63,12 @@
             return span.getBoundingClientRect().height;
         };
         const text = () => input.value.replaceAll(linesSeparator, wordSeparator);
-        const asyncResult = async (fn, check, intervalMs = 100) => new Promise((resolve) => {
-            const interval = window.setInterval(
-                () => {
-                    const result = fn();
-                    if (check(result)) {
-                        window.clearInterval(interval);
-                        resolve(result);
-                    }
-                },
-                intervalMs,
-            );
-        });
 
-        let maxLineWidth;
-
-        function init() {
-            asyncResult(
-                () => document.body.clientWidth,
-                clientWidth => clientWidth > 0,
-            ).
-            then(clientWidth => { maxLineWidth = clientWidth * 0.9 }).
-            then(update).
-            catch(console.error);
-        }
-
-        let running = false;
-        async function update() {
+        let saveTimer = null;
+        function update() {
+            // Read fresh each time: the viewport can still be settling on first load.
+            const maxLineWidth = document.body.clientWidth * 0.9;
+            if (!maxLineWidth) return;
             const words = text().split(wordSeparator);
             const wordWidths = words.map(getWidth);
             const wordsSeparatorWidth = getWidth(wordSeparator);
@@ -127,16 +106,19 @@
             input.style.height = `${getHeight("a") * (lines.length || 1)}px`;
             input.value = lines.join(linesSeparator);
 
-
-            if (running) return; // MAYBE: true mutex
-            running = true;
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            const inputVal = text();
-            document.title = inputVal;
-            history.replaceState(null, null, '#' + inputVal);
-
-            running = false;
+            // Throttle: browsers rate-limit replaceState. Edits made while waiting are
+            // picked up when the timer fires, so nothing is lost.
+            if (!saveTimer) {
+                saveTimer = setTimeout(
+                    () => {
+                        saveTimer = null;
+                        const inputVal = text();
+                        document.title = inputVal;
+                        history.replaceState(null, null, '#' + inputVal);
+                    },
+                    500,
+                );
+            }
         }
 
         (() => {
@@ -145,8 +127,8 @@
             span.style.fontSize   = css(input, 'font-size');
         })();
 
-        init();
-        // document.addEventListener("DOMContentLoaded", init);
+        // Fires once body first has a size, then on every resize.
+        new ResizeObserver(update).observe(document.body);
     </script>
     <script type="text/javascript">
         function setFavicon(href) {
