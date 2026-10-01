@@ -52,7 +52,7 @@
             input.value = decodeURI(hash);
         }
 
-        const separator = " ";
+        const wordSeparator = " ";
         const linesSeparator = "\n";
         const getWidth = text => {
             span.innerHTML = text;
@@ -62,7 +62,7 @@
             span.innerHTML = text;
             return span.getBoundingClientRect().height;
         };
-        const text = () => input.value.replaceAll(linesSeparator, separator);
+        const text = () => input.value.replaceAll(linesSeparator, wordSeparator);
         const asyncResult = async (fn, check, intervalMs = 100) => new Promise((resolve) => {
             const interval = window.setInterval(
                 () => {
@@ -90,19 +90,19 @@
 
         let running = false;
         async function update() {
-            const words = text().split(separator);
-            const widths = words.map(getWidth);
-            const spaceWidth = getWidth(separator);
+            const words = text().split(wordSeparator);
+            const wordWidths = words.map(getWidth);
+            const wordsSeparatorWidth = getWidth(wordSeparator);
             // Greedy pack under `limit`. No line exceeds it unless a single word does.
             const wrap = limit => {
                 const lines = [];
                 let line = [], width = 0;
-                words.forEach((word, index) => {
-                    const extra = line.length ? spaceWidth + widths[index] : widths[index];
+                words.forEach((word, wordIndex) => {
+                    const extra = (line.length ? wordsSeparatorWidth : 0) + wordWidths[wordIndex];
                     if (line.length && width + extra > limit) {
                         lines.push(line);
                         line = [word];
-                        width = widths[index];
+                        width = wordWidths[wordIndex];
                     } else {
                         line.push(word);
                         width += extra;
@@ -113,12 +113,16 @@
             // Fewest lines that fit, then the narrowest limit still reaching that
             // count - which is what balances them. Binary search, to the pixel.
             const nrLines = wrap(maxLineWidth).length;
-            let low = 0, high = Math.max(maxLineWidth, ...widths);
+            let low = 0, high = Math.max(maxLineWidth, ...wordWidths);
             while (high - low > 1) {
                 const middle = (low + high) / 2;
-                if (wrap(middle).length <= nrLines) high = middle; else low = middle;
+                if (wrap(middle).length <= nrLines) {
+                    high = middle;
+                } else {
+                    low = middle;
+                }
             }
-            const lines = wrap(high).map(line => line.join(separator));
+            const lines = wrap(high).map(line => line.join(wordSeparator));
             input.style.width = `${Math.max(...lines.map(getWidth)) || 3}px`;
             input.style.height = `${getHeight("a") * (lines.length || 1)}px`;
             input.value = lines.join(linesSeparator);
